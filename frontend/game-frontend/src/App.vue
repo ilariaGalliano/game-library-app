@@ -16,14 +16,12 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item active">
-            <a class="nav-link" href="/"
-              >Home <span class="sr-only">(current)</span></a
-            >
+            <a class="nav-link" href="/home">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/games">Games</a>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="/register">Register</a>
           </li>
           <li class="nav-item">
@@ -31,10 +29,12 @@
           </li>
           <li class="nav-item">
             <a class="nav-link disabled">Logout</a>
-          </li>
+          </li> -->
         </ul>
       </div>
     </nav>
+    <h1>HomePage</h1>
+    <p>Welcome to the Game library app</p>
     <router-view />
     <div class="card mt-4">
       <div class="card-header">Quote</div>

@@ -1,7 +1,7 @@
 <template>
   <div class="hello">
     <div class="container">
-      <h1>{{ name }}</h1>
+      <!-- <h1>{{ name }}</h1>
       <form action="/login" method="post" name="login-form">
         <div class="mb-3">
           <label for="name">Name: </label>
@@ -14,110 +14,71 @@
         <div class="mb-3">
           <label for="password">Password: </label>
           <input type="password" id="password" v-model="input.password" />
-        </div>
-        <button
+        </div> -->
+      <input type="text" v-model="email" placeholder="Email" />
+      <input type="password" v-model="password" placeholder="Password" />
+      <button @click="login">Login</button>
+      <!-- <button
           class="btn btn-outline-dark"
           type="submit"
           v-on:click.prevent="login()"
         >
           Login
         </button>
-      </form>
+      </form> -->
+    </div>
+
+    <div>
+      <h2>Data from Database</h2>
+      <ul>
+        <li v-for="item in data" :key="item.id">
+          {{ item.column1 }} - {{ item.column2 }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Login",
   data() {
     return {
-      input: {
-        name: "",
-        email: "",
-        password: "",
-      },
+      email: "",
+      password: "",
+      data: [],
     };
   },
   methods: {
-    // getStudents() {
-    //   axios.get(this.path).then((response) => {
-    //     console.log(response.data);
-    //     this.students = response.data.students;
-    //   });
-    // },
-
-    // saveStudent() {
-    //   axios.post(this.path, this.student).then((response) => {
-    //     console.log(response.data);
-    //     this.student = {};
-    //     this.getStudents();
-    //   });
-    // },
-    getResponse() {
-      // flask app url
-      const path = "http://localhost:5000/login";
+    login() {
       axios
-        .get(path)
-        .then((res) => {
-          console.log(res);
-          this.name = res.name;
-          this.email = res.email;
+        .post("http://localhost:5000/login", {
+          email: this.email,
+          password: this.password,
         })
-        .catch((err) => {
-          console.log(err);
+        .then((response) => {
+          console.log(response.data.message);
+          // Handle successful login (e.g., redirect to dashboard)
+        })
+        .catch((error) => {
+          console.error("Error logging in:", error.response.data.message);
+          // Handle login error (e.g., display error message)
         });
     },
-    login() {
-      //make sure name OR password are not empty
-      if (this.input.name != "" || this.input.password != "") {
-        console.log("authenticated");
-      } else {
-        console.log("Name and Password can not be empty");
-      }
-    },
   },
-  // lifecycle hooks
-  created() {
-    this.getResponse();
-  },
+  // mounted() {
+  //   axios
+  //     .get("http://localhost:5000/api/data")
+  //     .then((response) => {
+  //       this.data = response.data;
+  //       console.log("data", this.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching data:", error);
+  //     });
+  // },
 };
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
