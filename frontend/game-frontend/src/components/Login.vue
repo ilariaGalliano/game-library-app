@@ -1,40 +1,27 @@
 <template>
   <div class="hello">
     <div class="container">
-      <!-- <h1>{{ name }}</h1>
-      <form action="/login" method="post" name="login-form">
-        <div class="mb-3">
-          <label for="name">Name: </label>
-          <input type="text" id="name" v-model="input.name" />
-        </div>
-        <div class="mb-3">
-          <label for="email">Email: </label>
-          <input type="text" id="email" v-model="input.email" />
-        </div>
-        <div class="mb-3">
-          <label for="password">Password: </label>
-          <input type="password" id="password" v-model="input.password" />
-        </div> -->
-      <input type="text" v-model="email" placeholder="Email" />
-      <input type="password" v-model="password" placeholder="Password" />
-      <button @click="login">Login</button>
-      <!-- <button
-          class="btn btn-outline-dark"
-          type="submit"
-          v-on:click.prevent="login()"
-        >
-          Login
+      <h1>Login</h1>
+      <input
+        type="text"
+        v-model="email"
+        placeholder="Email"
+        class="input-field"
+      />
+      <input
+        type="password"
+        v-model="password"
+        placeholder="Password"
+        class="input-field"
+      />
+      <button class="btn btn-primary mx-2" @click="login">Login</button>
+      <!-- Success Popup -->
+      <div v-if="showSuccessPopup" class="success-popup">
+        <p>Registration successful!</p>
+        <button class="success-btn">
+          <router-link to="/games" class="link">Games</router-link>
         </button>
-      </form> -->
-    </div>
-
-    <div>
-      <h2>Data from Database</h2>
-      <ul>
-        <li v-for="item in data" :key="item.id">
-          {{ item.column1 }} - {{ item.column2 }}
-        </li>
-      </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +37,7 @@ export default {
       email: "",
       password: "",
       data: [],
+      showSuccessPopup: false,
     };
   },
   methods: {
@@ -61,7 +49,7 @@ export default {
         })
         .then((response) => {
           console.log(response.data.message);
-          // Handle successful login (e.g., redirect to dashboard)
+          this.showSuccessPopup = true;
         })
         .catch((error) => {
           console.error("Error logging in:", error.response.data.message);
@@ -82,3 +70,63 @@ export default {
   // },
 };
 </script>
+
+<style scoped>
+.hello {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 580px;
+}
+
+.container {
+  text-align: center;
+}
+
+.input-field {
+  padding: 8px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-outline-dark {
+  background-color: transparent;
+  border: 1px solid #343a40;
+  color: #343a40;
+}
+
+.success-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  z-index: 999;
+}
+
+.success-btn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.link {
+  color: #fff;
+  text-decoration: none;
+}
+</style>

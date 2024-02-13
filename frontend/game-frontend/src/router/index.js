@@ -3,10 +3,11 @@ import Games from "../components/Games.vue";
 import Login from "../components/Login.vue";
 import Register from "../components/Register.vue";
 import HomePage from "../components/HomePage.vue";
+import NewGame from "../components/NewGame.vue";
 
 const routes = [
   {
-    path: "/home",
+    path: "/",
     name: "Home",
     component: HomePage,
   },
@@ -14,6 +15,13 @@ const routes = [
     path: "/games",
     name: "Games",
     component: Games,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/new-games",
+    name: "NewGame",
+    component: NewGame,
+    meta: { requiresAuth: true },
   },
   {
     path: "/login",
