@@ -49,6 +49,7 @@ export default {
         })
         .then((response) => {
           console.log(response.data.message);
+          localStorage.setItem("token", response.data.token);
           this.showSuccessPopup = true;
         })
         .catch((error) => {
@@ -76,7 +77,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 580px;
+  height: 600px;
+  background: #34a3c682;
 }
 
 .container {

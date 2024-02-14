@@ -2,11 +2,11 @@
   <div class="hello">
     <div class="container">
       <h2 class="alert alert-info">Create A New Game</h2>
-      <form @submit.prevent="addGame(game.user_id)">
+      <form @submit.prevent="addGame(this.userId)">
         <div class="row">
           <div class="col">
             <div class="form-group">
-              <label class="form-label float-left ml-2">Id</label>
+              <label class="form-label ml-2">Id</label>
               <input type="text" class="form-control" v-model="game.id" />
             </div>
             <div class="form-group">
@@ -58,7 +58,6 @@ export default {
   data() {
     return {
       games: [],
-      data: [],
       currentGame: {},
       showSuccessPopup: false,
       userId: null,
@@ -79,12 +78,40 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
+    parseJWT(token) {
+      let base64Url = token.split(".")[1];
+      let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      let jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    },
+    getUserIDFromToken() {
+      const token = localStorage.getItem("token");
+      // Check if token exists
+      if (!token) {
+        console.error("Token not found in local storage");
+        return null;
+      }
+      console.log("d", token);
+      let payload = this.parseJWT(token);
+      console.log(payload.user_id);
+      return payload.user_id;
+    },
     getGames() {
-      this.userId = 1;
-      localStorage.setItem("user_id", this.userId);
-      const userID = localStorage.getItem("user_id");
+      this.userId = this.getUserIDFromToken();
+      // Make sure userId is not null or undefined
+      if (!this.userId) {
+        console.error("User ID is missing in local storage");
+        return;
+      }
       axios
-        .get(`http://localhost:5000/resources/games?user_id=${userID}`)
+        .get(`http://localhost:5000/resources/games?user_id=${this.userId}`)
         .then((res) => {
           console.log(res);
           this.games = res.data.map((game) => ({
@@ -97,8 +124,10 @@ export default {
         });
     },
     addGame(userId) {
-      this.game.user_id = userId;
-      axios.post(this.api, this.game).then((response) => {
+      this.userId = userId;
+      this.game.user_id = this.userId;
+      let apiTest = `http://localhost:5000/resources/games?user_id=${this.userId}`;
+      axios.post(apiTest, this.game).then((response) => {
         console.log(response.data);
         this.game = {};
         // for message alert
@@ -114,21 +143,6 @@ export default {
   created() {
     this.getGames();
   },
-  mounted() {
-    axios
-      .get("http://localhost:5000/api/data")
-      .then((response) => {
-        this.data = response.data;
-        console.log("data", this.data);
-        this.data.forEach((g) => {
-          console.log("dd", g.id);
-          this.userID = g.user_id[0];
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  },
 };
 </script>
 
@@ -139,6 +153,7 @@ export default {
   margin: 0 auto;
   padding: 20px;
   height: 600px;
+  margin-top: 50px;
 }
 
 .form-group {

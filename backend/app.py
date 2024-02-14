@@ -2,9 +2,15 @@ from flask import Flask,  redirect, render_template, request, session, url_for, 
 from flask_cors import CORS
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
+import jwt
+import datetime
+import os
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
+app.config['SECRET_KEY'] = os.urandom(24)
+
+
 
 # update app constantly
 app.config.from_object(__name__)
@@ -36,9 +42,10 @@ def page_not_found(e):
     return "<h1>OOPS</h1> <p> Page not found </p>", 404
 
 # routing api connection to album db
-@app.route("/resources/games", methods=["GET"])
+@app.route("/resources/games", methods=["GET", "POST"])
 def api_filter():
-    
+    token = session.get('token')
+
     query_parameters = request.args
     
     id_key = query_parameters.get("id")
@@ -72,6 +79,22 @@ def api_filter():
     cur = conn.cursor()
     
     results = cur.execute(query, to_filter).fetchall()
+
+    if request.method == "POST":
+        data = request.get_json()
+        
+        id = data['id']
+        name = data['name']
+        genre = data['genre']
+        played = data['played']
+        user_id = data['user_id']
+
+        # Insert new game into the database
+        cur.execute("INSERT INTO games (id, name, genre, played, user_id) VALUES (?, ?, ?, ?, ?)",
+                    (id, name, genre, played, user_id))
+        conn.commit()
+
+        return jsonify({'message': 'Game inserted successfully'}), 201
     
     conn.close()  # Close the connection after fetching results
     
@@ -81,12 +104,19 @@ def api_filter():
 @app.route('/resources/games/all', methods=["GET", "POST"])
 def api_all():
     # Check if user is logged in
+    token = session.get('token')
+    if not token:
+        return jsonify({'error': 'User not logged in'}), 401
 
-    user_id = session.get('user_id')
-    # if user_id is None:
-    #     return jsonify({'error': 'User not logged in'}), 401
+    # Decode the token to get the user_id
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'])
+        user_id = decoded_token.get('user_id')
+    except jwt.ExpiredSignatureError:
+        return jsonify({'error': 'Token is expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid token'}), 401
 
-     
 
     conn = sqlite3.connect(db)
     conn.row_factory = dict_factory
@@ -94,12 +124,11 @@ def api_all():
 
     if request.method == "POST":
         data = request.get_json()
-        query_parameters = request.args
+        
         id = data['id']
         name = data['name']
         genre = data['genre']
         played = data['played']
-        user_id = 1
 
         # Insert new game into the database
         cur.execute("INSERT INTO games (id, name, genre, played, user_id) VALUES (?, ?, ?, ?, ?)",
@@ -170,7 +199,7 @@ def login():
 
     conn = sqlite3.connect(db)
     c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE email=?", (email,))
+    c.execute("SELECT id, email FROM users WHERE email=? AND password=?", (email, password))
     user = c.fetchone()
     conn.close()
 
@@ -178,8 +207,10 @@ def login():
         return jsonify({'error': 'User not found'}), 404
 
     # Check if the provided password matches the stored password
-    if password == user[3]:  # password is stored in the fourth column
-        return jsonify({'message': 'Login successful'}), 200
+    if user:  # password == user[3] password is stored in the fourth column
+       user_id, email=user 
+       token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+       return jsonify({'message': 'Login successful', 'token': token }), 200
     else:
         return jsonify({'error': 'Invalid credentials'}), 401
     

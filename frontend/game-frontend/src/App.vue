@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light pb-3">
       <a class="navbar-brand" href="#">GAME·S</a>
       <button
         class="navbar-toggler"
@@ -34,14 +34,12 @@
       </div>
     </nav>
     <router-view />
-    <div class="card mt-4">
+    <div class="card">
       <div class="card-header">GAME·S website</div>
       <div class="card-body">
         <blockquote class="blockquote mb-0">
           <p>©copyright© 2024</p>
-          <footer class="blockquote-footer">
-            Ila <cite title="Source Title">•21</cite>
-          </footer>
+          <footer class="blockquote-footer">Ila •21</footer>
         </blockquote>
       </div>
     </div>
@@ -57,6 +55,14 @@
   color: #2c3e50;
 }
 
+.card-header {
+  background-color: #273a4d;
+  color: #fff;
+}
+.card-body {
+  background-color: #2c3e50;
+  color: #fff;
+}
 nav {
   padding: 30px;
 }

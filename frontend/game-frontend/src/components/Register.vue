@@ -4,7 +4,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 580px;
+      height: 600px;
+      justify-content: center;
+      align-content: center;
+      background-color: #34a3c682;
     "
   >
     <h1 class="mt-3 mb-3">Register here:</h1>

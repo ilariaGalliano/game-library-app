@@ -5,7 +5,7 @@
       <table class="table mt-5">
         <thead>
           <tr>
-            <th scope="col">#</th>
+            <!-- <th scope="col">#</th> -->
             <th scope="col">Name</th>
             <th scope="col">Genre</th>
             <th scope="col">Played</th>
@@ -14,7 +14,7 @@
         </thead>
         <tbody>
           <tr v-for="game in games" :key="game.id">
-            <th scope="row">{{ game.id }}</th>
+            <!-- <th scope="row">{{ game.id }}</th> -->
             <td>{{ game.name }}</td>
             <td>{{ game.genre }}</td>
             <td>{{ game.played }}</td>
@@ -42,7 +42,7 @@
         <div>
           <!-- Modal -->
           <div v-if="isModalOpen" class="card-info">
-            <form @submit.prevent="edit" class="w-100 modal-content">
+            <form @submit.prevent="edit" class="modal-content">
               <label for="name">Name:</label>
               <input type="text" id="name" v-model="editForm.name" />
 
@@ -113,27 +113,41 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
-    // getGames() {
-    //   axios
-    //     .get(this.api)
-    //     .then((res) => {
-    //       console.log(res.data);
-    //       this.games = res.data;
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //     });
-    // },
+    parseJWT(token) {
+      let base64Url = token.split(".")[1];
+      let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      let jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    },
+    getUserIDFromToken() {
+      const token = localStorage.getItem("token");
+      // Check if token exists
+      if (!token) {
+        console.error("Token not found in local storage");
+        return null;
+      }
+
+      let payload = this.parseJWT(token);
+      console.log(payload.user_id);
+      return payload.user_id;
+    },
     getGames() {
-      // if (!userId) {
-      //   console.error("User is not logged in");
-      //   return;
-      // }
-      this.userId = 1;
-      localStorage.setItem("user_id", this.userId);
-      const userID = localStorage.getItem("user_id");
+      const userId = this.getUserIDFromToken();
+
+      // Make sure userId is not null or undefined
+      if (!userId) {
+        console.error("User ID is missing in local storage");
+        return;
+      }
       axios
-        .get(`http://localhost:5000/resources/games?user_id=${userID}`)
+        .get(`http://localhost:5000/resources/games?user_id=${userId}`)
         .then((res) => {
           console.log(res);
           this.games = res.data.map((game) => ({
@@ -144,18 +158,6 @@ export default {
         .catch((err) => {
           console.error(err);
         });
-    },
-    addGame(userId) {
-      this.game.user_id = userId;
-      axios.post(this.api, this.game).then((response) => {
-        console.log(response.data);
-        this.game = {};
-        // for message alert
-        this.message = "Game added";
-        // to show message when game is added
-        this.showMessage = true;
-      });
-      this.getGames();
     },
     editBtn(id) {
       this.isModalOpen = !this.isModalOpen;
@@ -215,21 +217,6 @@ export default {
   created() {
     this.getGames();
   },
-  // mounted() {
-  //   axios
-  //     .get("http://localhost:5000/api/data")
-  //     .then((response) => {
-  //       this.data = response.data;
-  //       console.log("data", this.data);
-  //       this.data.forEach((g) => {
-  //         console.log("dd", g.id);
-  //         this.userID = g.user_id[0];
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching data:", error);
-  //     });
-  // },
 };
 </script>
 
@@ -239,7 +226,7 @@ export default {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
-  height: 700px;
+  height: 800px;
 }
 
 .hello {
@@ -282,7 +269,7 @@ td {
 }
 
 th {
-  background-color: #f2f2f2;
+  background-color: #34a3c682;
 }
 
 /* Popup Styles */
